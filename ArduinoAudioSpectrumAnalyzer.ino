@@ -68,8 +68,8 @@ void updateScreen()
 {
   tft.fillRect(0, 0, 100, 40, ST7735_BLACK);
 
-  static const auto textColor1 = RGB888_to_565(255, 235, 0);
-  static const auto textColor2 = RGB888_to_565(255, 0, 200);
+  static const uint16_t textColor1 = RGB888_to_565(255, 235, 0);
+  static const uint16_t textColor2 = RGB888_to_565(255, 0, 200);
   
   tft.setTextSize(3);
   tft.setCursor(0, 0);
