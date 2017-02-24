@@ -30,16 +30,19 @@ void setup() {
 
   tft.setTextSize(3);
 
-  Timer1.initialize(1000L * 33L); // initialize timer1, 1/30th sec period
+  Timer1.initialize(333L * 1000L); // initialize timer1, 1/30th sec period
   Timer1.attachInterrupt(updateScreen);
 
   Serial.println("Initialized");
 }
 
-template <typename T> void printNumber(T number, uint16_t color)
+template <typename T> void printNumber(T number, uint16_t color, bool newLineAfter = false)
 {
   tft.setTextColor(color);
-  tft.println(number);
+  if (newLineAfter)
+    tft.println(number);
+  else
+    tft.print(number);  
 }
 
 inline uint16_t RGB888_to_565(uint8_t R, uint8_t G, uint8_t B)
@@ -58,12 +61,20 @@ void loop() {
   // print the results to the serial monitor:
   Serial.print("sensor = ");
   Serial.println(maxSampleValue);
+
+  delay(1);
 }
 
 void updateScreen()
 {
+  tft.setTextSize(3);
   tft.fillScreen(ST7735_BLACK);
   tft.setCursor(0, 0);
-  printNumber(sample, RGB888_to_565(255, 128, 0));
+  printNumber(sample, RGB888_to_565(255, 235, 0));
+
+  tft.setTextSize(2);
+  tft.setCursor(0, 35);
+  tft.print("Max: ");
+  printNumber(maxSampleValue, RGB888_to_565(255, 0, 200));
 }
 
