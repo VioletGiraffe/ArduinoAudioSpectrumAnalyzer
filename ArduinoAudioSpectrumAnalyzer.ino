@@ -26,12 +26,8 @@ PDQ_ST7735 tft;
 #endif
 
 void setup() {
-  // initialize serial communications at 9600 bps:
-  Serial.begin(9600);
-  while (!Serial);
-
-  // Use this initializer if you're using a 1.8" TFT
-  //tft.initR(INITR_BLACKTAB);   // initialize a ST7735S chip, black tab
+//  Serial.begin(9600);
+//  while (!Serial);
 
   // Use this initializer (uncomment) if you're using a 1.44" TFT
   tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, black tab
@@ -41,8 +37,6 @@ void setup() {
 
   Timer1.initialize(100L * 1000L); // initialize timer1, 1/30th sec period
   Timer1.attachInterrupt(updateScreen);
-
-  Serial.println("Initialized");
 }
 
 template <typename T> void printNumber(T number, uint16_t color, bool newLineAfter = false)
@@ -67,19 +61,15 @@ void loop() {
   sample = analogRead(analogInPin);
   maxSampleValue = std::max(maxSampleValue, sample);
 
-  // print the results to the serial monitor:
-  Serial.print("sensor = ");
-  Serial.println(maxSampleValue);
-
   delay(1);
 }
-
-const auto textColor1 = RGB888_to_565(255, 235, 0);
-const auto textColor2 = RGB888_to_565(255, 0, 200);
 
 void updateScreen()
 {
   tft.fillRect(0, 0, 100, 40, ST7735_BLACK);
+
+  static const auto textColor1 = RGB888_to_565(255, 235, 0);
+  static const auto textColor2 = RGB888_to_565(255, 0, 200);
   
   tft.setTextSize(3);
   tft.setCursor(0, 0);
