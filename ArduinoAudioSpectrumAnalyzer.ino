@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "FHT_processing.h"
 
-#define USE_TEST_SIGNAL
+//#define USE_TEST_SIGNAL
 #include "Test_signal.h"
 
 #ifndef _PDQ_ST7735H_
@@ -78,7 +78,7 @@ ISR(ADC_vect) //when new ADC value ready
   
   const uint16_t sample = ADCL | ((uint16_t)ADCH << 8); // Somehow it is required that ADCL is read before ADCH, or it won't work!
 #ifndef USE_TEST_SIGNAL
-  fht_input[currentSampleIndex] = sample;
+  fht_input[currentSampleIndex] = sample - 512; // fht_input is signed! Skipping this step will result in DC offset
 #endif
 
   ++currentSampleIndex;
@@ -100,7 +100,7 @@ void loop()
   if (samplingWindowFull)
   {
 	// No-op if USE_TEST_SIGNAL is not defined
-	generateTestSignal(60 /* Hz */, 1024, 32);
+	generateTestSignal(1000 /* Hz */, 1024, 32);
 
     runFHT();
     updateScreen();
@@ -128,7 +128,6 @@ inline void updateScreen()
   tft.print(maxSampleValue);
 
   assert(FHT_N == 256);
-  for (int i = 2; i < 128; ++i)
+  for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
 	tft.drawFastVLine(i, 30, fht_log_out[i]/2, RGB_to_565(255, 255, 200));
-	//tft.drawPixel(i, 30 + fht_input[i]/12, RGB_to_565(255, 255, 200));
 }
