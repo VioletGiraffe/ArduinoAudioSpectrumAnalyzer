@@ -1,5 +1,3 @@
-#define TFT_RST 0  // you can also connect this to the Arduino reset, in which case, set this #define pin to 0!
-
 #include "PDQ_ST7735_config.h"
 #include <PDQ_FastPin.h>
 #include <PDQ_ST7735.h>
@@ -7,20 +5,13 @@
 #include <gfxfont.h>
 #include <PDQ_GFX.h>
 
-#include <TimerOne.h>
-
-#include <StandardCplusplus.h>
-#include <SPI.h>
-
-#include <algorithm>
-#include <math.h>
-
 #include "utils.h"
 
 #ifndef _PDQ_ST7735H_
-Adafruit_ST7735 tft = Adafruit_ST7735(ST7735_CS_PIN,  ST7735_DC_PIN, TFT_RST);
+  #define TFT_RST 0  // you can also connect this to the Arduino reset, in which case, set this #define pin to 0!
+  Adafruit_ST7735 tft = Adafruit_ST7735(ST7735_CS_PIN,  ST7735_DC_PIN, TFT_RST);
 #else
-PDQ_ST7735 tft;
+  PDQ_ST7735 tft;
 #endif
 
 void setup()
