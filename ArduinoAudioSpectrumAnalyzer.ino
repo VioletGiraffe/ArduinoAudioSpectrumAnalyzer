@@ -30,6 +30,7 @@ void setup()
   // Use this initializer (uncomment) if you're using a 1.44" TFT
   tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, black tab
   tft.fillScreen(ST7735_BLACK);
+  tft.setTextWrap(false);
 }
 
 void setupADC()
@@ -66,6 +67,7 @@ void setupADC()
 
 volatile uint16_t maxSampleValue = 0;
 volatile uint16_t minSampleValue = 65535;
+volatile uint16_t averageSampleValue = 0;
 
 constexpr uint16_t SamplingWindowSize = FHT_N;
 volatile bool samplingWindowFull = false;
@@ -82,6 +84,9 @@ ISR(ADC_vect) //when new ADC value ready
 #endif
 
   ++currentSampleIndex;
+
+  constexpr uint16_t k = 8;
+  averageSampleValue = (averageSampleValue * (k - 1) + sample) / k;
 
   if (currentSampleIndex == SamplingWindowSize)
   {
@@ -124,8 +129,12 @@ inline void updateScreen()
   tft.print(minSampleValue);
 
   tft.setTextColor(RGB_to_565(255, 0, 10));
-  tft.setCursor(64, 0);
+  tft.setCursor(45, 0);
   tft.print(maxSampleValue);
+
+  tft.setTextColor(RGB_to_565(0, 255, 10));
+  tft.setCursor(90, 0);
+  tft.print(averageSampleValue);
 
   assert(FHT_N == 256);
   for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
