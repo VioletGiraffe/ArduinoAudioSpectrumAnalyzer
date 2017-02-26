@@ -47,7 +47,10 @@ void setupADC()
   setBit(ADCSRA, ADEN); //enable ADC
   setBit(ADCSRA, ADSC); //start ADC measurements
 
-  analogReference(DEFAULT); // Use default (5v) aref voltage.
+  // See http://www.robotplatform.com/knowledge/ADC/adc_tutorial_3.html
+  // Leaving ADLAR cleared for the default right-justification and MUX3 though MUX0 bits cleared for only A0 input
+  // Setting the standard 5V reference.
+  ADMUX = 1 << REFS0; 
 
   sei();
 }
@@ -67,7 +70,7 @@ ISR(ADC_vect) //when new ADC value ready
   if (samplingWindowFull)
     return;
   
-  const uint16_t sample = ADCH;
+  const uint16_t sample = ((uint16_t)ADCH << 8) | ADCL;
   samples[currentSampleIndex] = sample;
   ++currentSampleIndex;
 
