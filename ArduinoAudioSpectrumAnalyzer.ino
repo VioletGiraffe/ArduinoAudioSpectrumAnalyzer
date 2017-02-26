@@ -138,5 +138,5 @@ inline void updateScreen()
 
   assert(FHT_N == 256);
   for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
-	tft.drawFastVLine(i, 30, fht_log_out[i]/2, RGB_to_565(255, 255, 200));
+	tft.drawFastVLine(i, 128 - fht_log_out[i] / 2, fht_log_out[i] / 2, RGB_to_565(255, 255, 200));
 }
