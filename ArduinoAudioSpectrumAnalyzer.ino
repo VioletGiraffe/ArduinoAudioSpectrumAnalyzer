@@ -62,7 +62,7 @@ constexpr uint16_t SamplingWindowSize = 256;
 
 volatile bool samplingWindowFull = false;
 uint16_t currentSampleIndex = 0;
-volatile uint16_t samples[SamplingWindowSize] = {0};
+volatile uint16_t samples[SamplingWindowSize];
 
 ISR(ADC_vect) //when new ADC value ready
 {
