@@ -13,6 +13,7 @@
 # VS files
 *vcxproj*
 __vm/
+*.sln
 
 
 # Build results
