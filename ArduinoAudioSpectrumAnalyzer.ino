@@ -108,17 +108,23 @@ template <typename T> void printNumber(T number, uint16_t color, bool newLineAft
 
 void updateScreen()
 {
-  tft.fillRect(0, 0, 100, 40, ST7735_BLACK);
+  tft.fillRect(0, 0, 100, 55, ST7735_BLACK);
+
+  // Symbol heights depending on text size: 1 - 10(?), 2 - 15, 3 - 25
 
   static const uint16_t textColor1 = RGB888_to_565(255, 235, 0);
   static const uint16_t textColor2 = RGB888_to_565(255, 0, 200);
   
   tft.setTextSize(3);
   tft.setCursor(0, 0);
-  printNumber(ADCH, textColor1);
+  printNumber(samples[SamplingWindowSize - 1], textColor1);
 
   tft.setTextSize(2);
   tft.setCursor(0, 25);
+  tft.print("Min: ");
+  printNumber(minSampleValue, textColor2);
+
+  tft.setCursor(0, 40);
   tft.print("Max: ");
   printNumber(maxSampleValue, textColor2);
 }
