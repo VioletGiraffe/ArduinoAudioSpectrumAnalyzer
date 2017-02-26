@@ -5,7 +5,14 @@
 #include <gfxfont.h>
 #include <PDQ_GFX.h>
 
+#include <assert.h>
+#include <math.h>
+
 #include "utils.h"
+#include "FHT_processing.h"
+
+#define USE_TEST_SIGNAL
+#include "Test_signal.h"
 
 #ifndef _PDQ_ST7735H_
   #define TFT_RST 0  // you can also connect this to the Arduino reset, in which case, set this #define pin to 0!
@@ -16,8 +23,10 @@
 
 void setup()
 {
+  // TODO:
+  // TIMSK0 = 0; // turn off timer0 for lower jitter
   setupADC();
-  
+
   // Use this initializer (uncomment) if you're using a 1.44" TFT
   tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, black tab
   tft.fillScreen(ST7735_BLACK);
@@ -58,11 +67,9 @@ void setupADC()
 volatile uint16_t maxSampleValue = 0;
 volatile uint16_t minSampleValue = 65535;
 
-constexpr uint16_t SamplingWindowSize = 256;
-
+constexpr uint16_t SamplingWindowSize = FHT_N;
 volatile bool samplingWindowFull = false;
 uint16_t currentSampleIndex = 0;
-volatile uint16_t samples[SamplingWindowSize];
 
 ISR(ADC_vect) //when new ADC value ready
 {
@@ -70,7 +77,10 @@ ISR(ADC_vect) //when new ADC value ready
     return;
   
   const uint16_t sample = ADCL | ((uint16_t)ADCH << 8); // Somehow it is required that ADCL is read before ADCH, or it won't work!
-  samples[currentSampleIndex] = sample;
+#ifndef USE_TEST_SIGNAL
+  fht_input[currentSampleIndex] = sample;
+#endif
+
   ++currentSampleIndex;
 
   if (currentSampleIndex == SamplingWindowSize)
@@ -89,42 +99,36 @@ void loop()
 {
   if (samplingWindowFull)
   {
+	// No-op if USE_TEST_SIGNAL is not defined
+	generateTestSignal(60 /* Hz */, 1024, 32);
+
+    runFHT();
     updateScreen();
-    delay(60);
+    delay(67);
     samplingWindowFull = false; // Allow the new sample set to be collected - only after the delay. Else the sample set would be 60 ms stale by the time we get to process it.
   }
 }
 
-template <typename T> void printNumber(T number, uint16_t color, bool newLineAfter = false)
-{
-  tft.setTextColor(color);
-  if (newLineAfter)
-    tft.println(number);
-  else
-    tft.print(number);  
-}
+#define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
-void updateScreen()
+inline void updateScreen()
 {
-  tft.fillRect(0, 0, 100, 55, ST7735_BLACK);
+  //tft.fillRect(0, 0, 100, 55, ST7735_BLACK);
+	tft.fillScreen(RGB_to_565(0, 0, 0));
 
   // Symbol heights depending on text size: 1 - 10(?), 2 - 15, 3 - 25
 
-  static const uint16_t textColor1 = RGB888_to_565(255, 235, 0);
-  static const uint16_t textColor2 = RGB888_to_565(255, 0, 200);
-
-  tft.setTextColor(textColor1);
-  tft.setTextSize(3);
-  tft.setCursor(0, 0);
-  tft.print(samples[SamplingWindowSize - 1]);
-
-  tft.setTextColor(textColor2);
   tft.setTextSize(2);
-  tft.setCursor(0, 25);
-  tft.print("Min: ");
+  tft.setTextColor(RGB_to_565(0, 200, 255));
+  tft.setCursor(0, 0);
   tft.print(minSampleValue);
 
-  tft.setCursor(0, 40);
-  tft.print("Max: ");
+  tft.setTextColor(RGB_to_565(255, 0, 10));
+  tft.setCursor(64, 0);
   tft.print(maxSampleValue);
+
+  assert(FHT_N == 256);
+  for (int i = 2; i < 128; ++i)
+	tft.drawFastVLine(i, 30, fht_log_out[i]/2, RGB_to_565(255, 255, 200));
+	//tft.drawPixel(i, 30 + fht_input[i]/12, RGB_to_565(255, 255, 200));
 }
