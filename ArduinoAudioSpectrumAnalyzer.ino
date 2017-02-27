@@ -119,6 +119,8 @@ void loop()
 
 inline void updateScreen()
 {
+	const auto start_us = micros();
+
 	FastGraphics fastTFT(tft);
 
 	//tft.fillRect(0, 0, 100, 55, ST7735_BLACK);
@@ -127,9 +129,9 @@ inline void updateScreen()
 	// Symbol heights depending on text size: 1 - 10(?), 2 - 15, 3 - 25
 
 	fastTFT.setTextSize(2);
-	fastTFT.setTextColor(RGB_to_565(0, 200, 255));
-	fastTFT.setCursor(0, 0);
-	fastTFT.print(minSampleValue);
+	//fastTFT.setTextColor(RGB_to_565(0, 200, 255));
+	//fastTFT.setCursor(0, 0);
+	//fastTFT.print(minSampleValue);
 
 	fastTFT.setTextColor(RGB_to_565(255, 0, 10));
 	fastTFT.setCursor(45, 0);
@@ -142,4 +144,9 @@ inline void updateScreen()
 	assert(FHT_N == 256);
 	for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
 		fastTFT.drawFastVLine(i, 128 - fht_log_out[i] / 2, fht_log_out[i] / 2, RGB_to_565(255, 255, 200));
+
+	const auto elapsed = (micros() - start_us) / 1000;
+	fastTFT.setTextColor(RGB_to_565(0, 200, 255));
+	fastTFT.setCursor(0, 0);
+	fastTFT.print(elapsed);
 }
