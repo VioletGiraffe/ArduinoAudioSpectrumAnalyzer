@@ -4,6 +4,8 @@
 // You need to include this file above #include "PDQ_ILI9340.h" in your sketch.
 // Check settings on lines marked with "<=".
 
+#pragma once
+
 // ST7735 has several variations, set your version based on this list (using the color of the "tab" on the screen cover).
 // NOTE: The tab colors refer to Adafruit versions, other suppliers may vary (you may have to experiment to find the right one).
 enum

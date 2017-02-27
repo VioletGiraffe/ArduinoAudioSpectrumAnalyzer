@@ -10,6 +10,7 @@
 
 #include "utils.h"
 #include "FHT_processing.h"
+#include "FastGraphics.h"
 
 //#define USE_TEST_SIGNAL
 #include "Test_signal.h"
@@ -118,25 +119,27 @@ void loop()
 
 inline void updateScreen()
 {
+	FastGraphics fastTFT(tft);
+
 	//tft.fillRect(0, 0, 100, 55, ST7735_BLACK);
-	tft.fillScreen(RGB_to_565(0, 0, 0));
+	fastTFT.fillScreen(RGB_to_565(0, 0, 0));
 
 	// Symbol heights depending on text size: 1 - 10(?), 2 - 15, 3 - 25
 
-	tft.setTextSize(2);
-	tft.setTextColor(RGB_to_565(0, 200, 255));
-	tft.setCursor(0, 0);
-	tft.print(minSampleValue);
+	fastTFT.setTextSize(2);
+	fastTFT.setTextColor(RGB_to_565(0, 200, 255));
+	fastTFT.setCursor(0, 0);
+	fastTFT.print(minSampleValue);
 
-	tft.setTextColor(RGB_to_565(255, 0, 10));
-	tft.setCursor(45, 0);
-	tft.print(maxSampleValue);
+	fastTFT.setTextColor(RGB_to_565(255, 0, 10));
+	fastTFT.setCursor(45, 0);
+	fastTFT.print(maxSampleValue);
 
-	tft.setTextColor(RGB_to_565(0, 255, 10));
-	tft.setCursor(90, 0);
-	tft.print(averageSampleValue);
+	fastTFT.setTextColor(RGB_to_565(0, 255, 10));
+	fastTFT.setCursor(90, 0);
+	fastTFT.print(averageSampleValue);
 
 	assert(FHT_N == 256);
 	for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
-		tft.drawFastVLine(i, 128 - fht_log_out[i] / 2, fht_log_out[i] / 2, RGB_to_565(255, 255, 200));
+		fastTFT.drawFastVLine(i, 128 - fht_log_out[i] / 2, fht_log_out[i] / 2, RGB_to_565(255, 255, 200));
 }
