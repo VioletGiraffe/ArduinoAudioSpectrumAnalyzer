@@ -19,7 +19,7 @@
 #define TFT_RST 0  // you can also connect this to the Arduino reset, in which case, set this #define pin to 0!
 Adafruit_ST7735 tft = Adafruit_ST7735(ST7735_CS_PIN, ST7735_DC_PIN, TFT_RST);
 #else
-PDQ_ST7735 tft;
+FastGraphics_ST7735 tft;
 #endif
 
 void setup()
@@ -32,6 +32,7 @@ void setup()
 	tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, black tab
 	tft.fillScreen(ST7735_BLACK);
 	tft.setTextWrap(false);
+	tft.setTextSize(2);
 }
 
 void setupADC()
@@ -74,6 +75,8 @@ constexpr uint16_t SamplingWindowSize = FHT_N;
 volatile bool samplingWindowFull = false;
 uint16_t currentSampleIndex = 0;
 
+uint8_t previousFhtValues[FHT_N / 2];
+
 ISR(ADC_vect) //when new ADC value ready
 {
 	if (samplingWindowFull)
@@ -108,9 +111,9 @@ void loop()
 		// No-op if USE_TEST_SIGNAL is not defined
 		generateTestSignal(1000 /* Hz */, 1024, 32);
 
+		memcpy(previousFhtValues, fht_log_out, FHT_N / 2);
 		runFHT();
 		updateScreen();
-		delay(67);
 		samplingWindowFull = false; // Allow the new sample set to be collected - only after the delay. Else the sample set would be 60 ms stale by the time we get to process it.
 	}
 }
@@ -119,34 +122,45 @@ void loop()
 
 inline void updateScreen()
 {
-	const auto start_us = micros();
+	const auto start = millis();
 
-	FastGraphics fastTFT(tft);
+	assert(FHT_N == 256);
+	//for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
+	//{
+	//	const auto freeSpaceHeight = tft.height() - fht_log_out[i] / 2;
 
-	//tft.fillRect(0, 0, 100, 55, ST7735_BLACK);
-	fastTFT.fillScreen(RGB_to_565(0, 0, 0));
+	//	tft.drawFastVLine(i, 25, freeSpaceHeight, RGB_to_565(0, 0, 0));
+	//	tft.drawFastVLine(i, freeSpaceHeight, 128, RGB_to_565(255, 255, 200));
+	//}
+
+	for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
+	{
+		const int diff = (int)fht_log_out[i] / 2 - previousFhtValues[i] / 2;
+		if (diff > 0)
+			tft.drawFastVLine(i, tft.height() - fht_log_out[i] / 2, diff, RGB_to_565(255, 255, 200));
+		else if (diff < 0)
+			tft.drawFastVLine(i, tft.height() - previousFhtValues[i] / 2, -diff, RGB_to_565(0, 0, 0));
+	}
+
 
 	// Symbol heights depending on text size: 1 - 10(?), 2 - 15, 3 - 25
 
-	fastTFT.setTextSize(2);
-	//fastTFT.setTextColor(RGB_to_565(0, 200, 255));
-	//fastTFT.setCursor(0, 0);
-	//fastTFT.print(minSampleValue);
+	//tft.setTextColor(RGB_to_565(0, 200, 255));
+	//tft.setCursor(0, 0);
+	//tft.print(minSampleValue);
 
-	fastTFT.setTextColor(RGB_to_565(255, 0, 10));
-	fastTFT.setCursor(45, 0);
-	fastTFT.print(maxSampleValue);
+	tft.fillRect(45, 0, 40, 25, ST7735_BLACK);
+	tft.setTextColor(RGB_to_565(255, 0, 10));
+	tft.setCursor(45, 0);
+	tft.print(maxSampleValue);
 
-	fastTFT.setTextColor(RGB_to_565(0, 255, 10));
-	fastTFT.setCursor(90, 0);
-	fastTFT.print(averageSampleValue);
+	tft.fillRect(90, 0, 40, 25, ST7735_BLACK);
+	tft.setTextColor(RGB_to_565(0, 255, 10));
+	tft.setCursor(90, 0);
+	tft.print(averageSampleValue);
 
-	assert(FHT_N == 256);
-	for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
-		fastTFT.drawFastVLine(i, 128 - fht_log_out[i] / 2, fht_log_out[i] / 2, RGB_to_565(255, 255, 200));
-
-	const auto elapsed = (micros() - start_us) / 1000;
-	fastTFT.setTextColor(RGB_to_565(0, 200, 255));
-	fastTFT.setCursor(0, 0);
-	fastTFT.print(elapsed);
+	tft.fillRect(0, 0, 40, 25, ST7735_BLACK);
+	tft.setTextColor(RGB_to_565(0, 200, 255));
+	tft.setCursor(0, 0);
+	tft.print(millis() - start);
 }
