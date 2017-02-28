@@ -118,6 +118,22 @@ void loop()
 	}
 }
 
+inline String paddedString(const String& s, const uint8_t width, const bool leftJustify = true /* otherwise right-justify */)
+{
+	String padded;
+
+	if (leftJustify)
+		padded = s;
+
+	for (int i = 0; i < (int)s.length() - width; ++i) // If len < s.length(), the loop will handle it correctly, i. e. do nothing
+		padded += ' ';
+
+	if (!leftJustify)
+		padded += s;
+
+	return padded;
+}
+
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
 inline void updateScreen()
@@ -151,13 +167,13 @@ inline void updateScreen()
 
 	tft.setTextColor(RGB_to_565(255, 0, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(45, 0);
-	tft.print(maxSampleValue);
+	tft.print(paddedString(String(maxSampleValue), 4));
 
 	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
-	tft.print(averageSampleValue);
+	tft.print(paddedString(String(averageSampleValue), 4));
 
 	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);
-	tft.print(millis() - start);
+	tft.print(paddedString(String(millis() - start), 4));
 }
