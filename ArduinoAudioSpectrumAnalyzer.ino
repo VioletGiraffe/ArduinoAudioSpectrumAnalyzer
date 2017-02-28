@@ -26,10 +26,10 @@ void setup()
 {
 	// TODO:
 	// TIMSK0 = 0; // turn off timer0 for lower jitter
+
 	setupADC();
 
-	// Use this initializer (uncomment) if you're using a 1.44" TFT
-	tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, black tab
+	tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, 1.44" TFT, black tab
 	tft.fillScreen(ST7735_BLACK);
 	tft.setTextWrap(false);
 	tft.setTextSize(2);
@@ -149,18 +149,15 @@ inline void updateScreen()
 	//tft.setCursor(0, 0);
 	//tft.print(minSampleValue);
 
-	tft.fillRect(45, 0, 40, 25, ST7735_BLACK);
-	tft.setTextColor(RGB_to_565(255, 0, 10));
+	tft.setTextColor(RGB_to_565(255, 0, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(45, 0);
 	tft.print(maxSampleValue);
 
-	tft.fillRect(90, 0, 40, 25, ST7735_BLACK);
-	tft.setTextColor(RGB_to_565(0, 255, 10));
+	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
 	tft.print(averageSampleValue);
 
-	tft.fillRect(0, 0, 40, 25, ST7735_BLACK);
-	tft.setTextColor(RGB_to_565(0, 200, 255));
+	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);
 	tft.print(millis() - start);
 }
