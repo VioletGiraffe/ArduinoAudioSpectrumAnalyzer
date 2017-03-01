@@ -1,27 +1,36 @@
 #pragma once
 
-uint16_t peakLevel = 0;
-uint16_t meanLevel = 0;
+#include <math.h>
 
-uint16_t previousSampleValue = 0;
-
-// 50 ms is the period of a 20 Hz wave. Averaging over a shorter period of time will not correctly handle low frequencies
-constexpr uint16_t NumberOfSamplesToAverage = 38400 /* samples per second */ * 50 /* ms */ / 1000;
-uint16_t numSamplesAccountedFor = 0;
-uint32_t sampleBuffer = 0;
+uint16_t peakLevelLatched = 0;
+uint16_t RMS = 0;
 
 inline void processNewSample(uint16_t newSample)
 {
-	if (peakLevel < newSample)
-		peakLevel = newSample;
+	// 50 ms is the period of a 20 Hz wave. Averaging over a shorter period of time will not correctly handle low frequencies. 4096 samples is slightly more than 50 ms.
+	// At 38400 Hz sample rate, uint32_t buffer and 10 bit precision (1024 max value), the maximum length of the window that will not trigger overflow is 99 ms.
+	static constexpr uint16_t NumberOfSamplesToAverage = 3814;
+	static uint16_t numSamplesAccumulatedInBuffer = 0; // How many samples have been added to the buffer during the analysis of the current window (the window is NumberOfSamplesToAverage long).
+	static uint32_t RMSBuffer = 0;
+	static uint16_t peakLevelTemp = 0;
 
-	if (numSamplesAccountedFor == NumberOfSamplesToAverage)
-		sampleBuffer -= previousSampleValue;
+	if (numSamplesAccumulatedInBuffer == NumberOfSamplesToAverage)
+	{
+		// Updating the latched values
+		peakLevelLatched = peakLevelTemp;
+		RMS = sqrt(RMSBuffer / NumberOfSamplesToAverage);
+
+		// Clearing the running values
+		RMSBuffer = 0;
+		numSamplesAccumulatedInBuffer = 0;
+		peakLevelTemp = 0;
+	}
 	else
-		++numSamplesAccountedFor;
+		++numSamplesAccumulatedInBuffer;
 
-	sampleBuffer += newSample;
-	previousSampleValue = newSample;
+	// Update the running values
+	if (peakLevelTemp < newSample)
+		peakLevelTemp = newSample;
 
-	meanLevel = sampleBuffer / numSamplesAccountedFor;
+	RMSBuffer += newSample * newSample;
 }

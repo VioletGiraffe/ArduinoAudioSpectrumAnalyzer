@@ -27,7 +27,7 @@ void setup()
 {
 	setupADC();
 
-	tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, 1.44" TFT, black tab
+	tft.initR(ST7735_INITR_144GREENTAB); // initialize a ST7735S chip, 1.44" TFT, black tab
 	tft.fillScreen(ST7735_BLACK);
 	tft.setTextWrap(false);
 	tft.setTextSize(2);
@@ -65,15 +65,12 @@ void setupADC()
 	sei();
 }
 
-// Variables for individual (scalar) samples and statistics
+// Variables for individual samples and statistics
 volatile uint16_t maxSampleValue = 0;
 volatile uint16_t minSampleValue = 65535;
-volatile uint16_t averageSampleValue = 0;
 
 // Variables for storing and managing a window (fixed-length span) of samples
-constexpr uint16_t SamplingWindowSize = FHT_N;
 volatile bool samplingWindowFull = false;
-uint16_t currentSampleIndex = 0;
 uint8_t previousFhtValues[FHT_N / 2]; // The previous set of FHT results, used for optimizing the screen redraw
 
 ISR(ADC_vect) //when new ADC value ready
@@ -90,16 +87,15 @@ ISR(ADC_vect) //when new ADC value ready
 	if (samplingWindowFull)
 		return;
 
+	static uint16_t currentSampleIndex = 0;
+
 #ifndef USE_TEST_SIGNAL
 	fht_input[currentSampleIndex] = sample - 512; // fht_input is signed! Skipping this step will result in DC offset
 #endif
 
 	++currentSampleIndex;
 
-	constexpr uint16_t k = 8;
-	averageSampleValue = (averageSampleValue * (k - 1) + sample) / k;
-
-	if (currentSampleIndex == SamplingWindowSize)
+	if (currentSampleIndex == FHT_N)
 	{
 		currentSampleIndex = 0;
 		samplingWindowFull = true;
@@ -173,7 +169,7 @@ inline void updateScreen()
 
 	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
-	tft.print(paddedString(String(averageSampleValue), 4));
+	tft.print(paddedString(String(RMS), 4));
 
 	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);
