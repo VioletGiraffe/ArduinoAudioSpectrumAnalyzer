@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "FHT_processing.h"
 #include "FastGraphics.h"
+#include "VU_meter.h"
 
 //#define USE_TEST_SIGNAL
 #include "Test_signal.h"
@@ -24,9 +25,6 @@ FastGraphics_ST7735 tft;
 
 void setup()
 {
-	// TODO:
-	// TIMSK0 = 0; // turn off timer0 for lower jitter
-
 	setupADC();
 
 	tft.initR(ST7735_INITR_144GREENTAB);   // initialize a ST7735S chip, 1.44" TFT, black tab
@@ -67,22 +65,31 @@ void setupADC()
 	sei();
 }
 
+// Variables for individual (scalar) samples and statistics
 volatile uint16_t maxSampleValue = 0;
 volatile uint16_t minSampleValue = 65535;
 volatile uint16_t averageSampleValue = 0;
 
+// Variables for storing and managing a window (fixed-length span) of samples
 constexpr uint16_t SamplingWindowSize = FHT_N;
 volatile bool samplingWindowFull = false;
 uint16_t currentSampleIndex = 0;
-
-uint8_t previousFhtValues[FHT_N / 2];
+uint8_t previousFhtValues[FHT_N / 2]; // The previous set of FHT results, used for optimizing the screen redraw
 
 ISR(ADC_vect) //when new ADC value ready
 {
+	const uint16_t sample = ADCL | ((uint16_t)ADCH << 8); // Somehow it is required that ADCL is read before ADCH, or it won't work!
+
+	if (sample > maxSampleValue)
+		maxSampleValue = sample;
+	else if (sample < minSampleValue)
+		minSampleValue = sample;
+
+	processNewSample(sample);
+
 	if (samplingWindowFull)
 		return;
 
-	const uint16_t sample = ADCL | ((uint16_t)ADCH << 8); // Somehow it is required that ADCL is read before ADCH, or it won't work!
 #ifndef USE_TEST_SIGNAL
 	fht_input[currentSampleIndex] = sample - 512; // fht_input is signed! Skipping this step will result in DC offset
 #endif
@@ -97,11 +104,6 @@ ISR(ADC_vect) //when new ADC value ready
 		currentSampleIndex = 0;
 		samplingWindowFull = true;
 	}
-
-	if (sample > maxSampleValue)
-		maxSampleValue = sample;
-	else if (sample < minSampleValue)
-		minSampleValue = sample;
 }
 
 void loop()
