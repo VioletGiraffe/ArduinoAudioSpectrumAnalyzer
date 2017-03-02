@@ -31,7 +31,6 @@ void setup()
 	tft.initR(ST7735_INITR_144GREENTAB); // initialize a ST7735S chip, 1.44" TFT, black tab
 	tft.fillScreen(ST7735_BLACK);
 	tft.setTextWrap(false);
-	tft.setTextSize(2);
 }
 
 void setupADC()
@@ -138,8 +137,8 @@ inline String paddedString(const String& s, const uint8_t width, const bool left
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
 constexpr uint16_t textYpos = 0;
-constexpr uint16_t vuYpos = textYpos + 5;
-constexpr uint16_t spectrumYpos = vuYpos + 10;
+constexpr uint16_t vuYpos = textYpos + 5, vuHeight = 10;
+constexpr uint16_t spectrumYpos = vuYpos + vuHeight;
 
 constexpr int ScreenWidth = 128, ScreenHeight = 128;
 
@@ -200,8 +199,9 @@ inline void updateVuDisplay()
 	constexpr int vuTextWidth = 50;
 	const auto barWidth = rmsHistory.back() * (ScreenWidth - vuTextWidth) / 1024;
 
-	tft.fillRect(0, vuYpos, barWidth, 10, RGB_to_565(0, 255, 30));
-	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, 10, RGB_to_565(0, 0, 0));
+	tft.fillRect(0, vuYpos, barWidth, vuHeight, RGB_to_565(0, 255, 30));
+	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
+	tft.drawFastVLine(peakLevel, vuYpos, vuHeight, RGB_to_565(255, 0, 0));
 
 	tft.setTextSize(1);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));

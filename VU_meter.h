@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-uint16_t peakLevelLatched = 0;
+static uint16_t peakLevel = 0;
 
 static CRingBuffer<uint16_t, 8> rmsHistory;
 
@@ -20,7 +20,7 @@ inline void processNewSample(uint16_t newSample)
 	if (numSamplesAccumulatedInBuffer == NumberOfSamplesToAverage)
 	{
 		// Updating the latched values
-		peakLevelLatched = peakLevelTemp;
+		peakLevel = peakLevelTemp;
 		rmsHistory.pushValue((uint16_t)sqrt(RMSBuffer / NumberOfSamplesToAverage));
 
 		// Clearing the running values
