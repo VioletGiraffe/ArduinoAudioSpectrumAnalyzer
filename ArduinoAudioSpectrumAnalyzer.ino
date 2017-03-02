@@ -137,7 +137,7 @@ inline String paddedString(const String& s, const uint8_t width, const bool left
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
 constexpr uint16_t textYpos = 0;
-constexpr uint16_t vuYpos = textYpos + 5, vuHeight = 10;
+constexpr uint16_t vuYpos = textYpos + 25 + 5, vuHeight = 10;
 constexpr uint16_t spectrumYpos = vuYpos + vuHeight;
 
 constexpr int ScreenWidth = 128, ScreenHeight = 128;
@@ -179,7 +179,7 @@ inline void updateSpectrumDisplay()
 
 	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
-	tft.print(paddedString(String(minSampleValue), 4));
+	tft.print(paddedString(String(rmsHistory.back()), 4));
 
 	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);
@@ -196,14 +196,27 @@ inline void updateVuDisplay()
 	//const auto rmsExtremums = findMinMax(rmsHistory);
 	const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f);
 
-	constexpr int vuTextWidth = 50;
+	constexpr int vuTextWidth = 6 * 6;
+
+	static auto previousPeak = peakHistory.back();
+
+	auto peak = peakHistory.back();
+	if (peak < previousPeak && peak >= 48)
+		peak = previousPeak - 48;
+
+	previousPeak = peak;
+
 	const auto barWidth = rmsHistory.back() * (ScreenWidth - vuTextWidth) / 1024;
+	auto peakLevelXpos = peak * (ScreenWidth - vuTextWidth) / 1024;
+	if (peakLevelXpos < barWidth)
+		peakLevelXpos = barWidth;
 
 	tft.fillRect(0, vuYpos, barWidth, vuHeight, RGB_to_565(0, 255, 30));
 	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
-	tft.drawFastVLine(peakHistory.back(), vuYpos, vuHeight, RGB_to_565(255, 0, 0));
+	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
 
 	tft.setTextSize(1);
+	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
 	tft.print(paddedString(String(db), 3, false) + " dB");
 }
