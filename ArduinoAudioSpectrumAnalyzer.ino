@@ -102,22 +102,6 @@ ISR(ADC_vect) //when new ADC value ready
 	}
 }
 
-void loop()
-{
-	if (samplingWindowFull)
-	{
-		// No-op if USE_TEST_SIGNAL is not defined
-		generateTestSignal(1000 /* Hz */, 1024, 32);
-
-		memcpy(previousFhtValues, fht_log_out, FHT_N / 2);
-		runFHT();
-		updateTextDisplay();
-		updateSpectrumDisplay();
-		updateVuDisplay();
-		samplingWindowFull = false; // Allow the new sample set to be collected - only after the delay. Else the sample set would be 60 ms stale by the time we get to process it.
-	}
-}
-
 inline String paddedString(const String& s, const uint8_t width, const bool leftJustify = true /* otherwise right-justify */)
 {
 	String padded;
@@ -134,6 +118,31 @@ inline String paddedString(const String& s, const uint8_t width, const bool left
 	return padded;
 }
 
+void loop()
+{
+	if (samplingWindowFull)
+	{
+		// No-op if USE_TEST_SIGNAL is not defined
+		generateTestSignal(1000 /* Hz */, 1024, 32);
+
+		memcpy(previousFhtValues, fht_log_out, FHT_N / 2);
+		runFHT();
+
+		const auto start = millis();
+
+		updateTextDisplay();
+		updateSpectrumDisplay();
+		updateVuDisplay();
+
+		tft.setTextSize(2);
+		tft.setTextColor(0x051F, 0x0000);
+		tft.setCursor(0, 0);
+		tft.print(paddedString(String(millis() - start), 4));
+
+		samplingWindowFull = false; // Allow the new sample set to be collected - only after the delay. Else the sample set would be 60 ms stale by the time we get to process it.
+	}
+}
+
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
 constexpr uint16_t textYpos = 0;
@@ -144,8 +153,6 @@ constexpr int ScreenWidth = 128, ScreenHeight = 128;
 
 inline void updateSpectrumDisplay()
 {
-	const auto start = millis();
-
 	assert(FHT_N == 256);
 	//for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
 	//{
@@ -180,10 +187,6 @@ inline void updateSpectrumDisplay()
 	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
 	tft.print(paddedString(String(rmsHistory.back()), 4));
-
-	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
-	tft.setCursor(0, 0);
-	tft.print(paddedString(String(millis() - start), 4));
 }
 
 inline void updateTextDisplay()
