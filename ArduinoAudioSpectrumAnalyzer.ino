@@ -112,7 +112,9 @@ void loop()
 
 		memcpy(previousFhtValues, fht_log_out, FHT_N / 2);
 		runFHT();
-		updateScreen();
+		updateTextDisplay();
+		updateSpectrumDisplay();
+		updateVuDisplay();
 		samplingWindowFull = false; // Allow the new sample set to be collected - only after the delay. Else the sample set would be 60 ms stale by the time we get to process it.
 	}
 }
@@ -135,7 +137,13 @@ inline String paddedString(const String& s, const uint8_t width, const bool left
 
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
-inline void updateScreen()
+constexpr uint16_t textYpos = 0;
+constexpr uint16_t vuYpos = textYpos + 5;
+constexpr uint16_t spectrumYpos = vuYpos + 10;
+
+constexpr int ScreenWidth = 128, ScreenHeight = 128;
+
+inline void updateSpectrumDisplay()
 {
 	const auto start = millis();
 
@@ -152,19 +160,19 @@ inline void updateScreen()
 	{
 		const int diff = (int)fht_log_out[i] / 2 - previousFhtValues[i] / 2;
 		if (diff > 0)
-			tft.drawFastVLine(i, tft.height() - fht_log_out[i] / 2, diff, RGB_to_565(255, 255, 200));
+			tft.drawFastVLine(i, ScreenHeight - fht_log_out[i] / 2, diff, RGB_to_565(255, 255, 200));
 		else if (diff < 0)
-			tft.drawFastVLine(i, tft.height() - previousFhtValues[i] / 2, -diff, RGB_to_565(0, 0, 0));
+			tft.drawFastVLine(i, ScreenHeight - previousFhtValues[i] / 2, -diff, RGB_to_565(0, 0, 0));
 	}
 
 
 	// Symbol heights depending on text size: 1 - 10(?), 2 - 15, 3 - 25
 
+	tft.setTextSize(2);
+
 	//tft.setTextColor(RGB_to_565(0, 200, 255));
 	//tft.setCursor(0, 0);
 	//tft.print(minSampleValue);
-
-	const auto rmsExtremums = findMinMax(rmsHistory);
 
 	tft.setTextColor(RGB_to_565(255, 0, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(45, 0);
@@ -177,4 +185,25 @@ inline void updateScreen()
 	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);
 	tft.print(paddedString(String(millis() - start), 4));
+}
+
+inline void updateTextDisplay()
+{
+
+}
+
+inline void updateVuDisplay()
+{
+	//const auto rmsExtremums = findMinMax(rmsHistory);
+	const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f);
+
+	constexpr int vuTextWidth = 50;
+	const auto barWidth = rmsHistory.back() * (ScreenWidth - vuTextWidth) / 1024;
+
+	tft.fillRect(0, vuYpos, barWidth, 10, RGB_to_565(0, 255, 30));
+	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, 10, RGB_to_565(0, 0, 0));
+
+	tft.setTextSize(1);
+	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
+	tft.print(paddedString(String(db), 3, false) + " dB");
 }
