@@ -12,6 +12,7 @@
 #include "FHT_processing.h"
 #include "FastGraphics.h"
 #include "VU_meter.h"
+#include "Algorithms.h"
 
 //#define USE_TEST_SIGNAL
 #include "Test_signal.h"
@@ -163,13 +164,15 @@ inline void updateScreen()
 	//tft.setCursor(0, 0);
 	//tft.print(minSampleValue);
 
+	const auto rmsExtremums = findMinMax(rmsHistory);
+
 	tft.setTextColor(RGB_to_565(255, 0, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(45, 0);
 	tft.print(paddedString(String(maxSampleValue), 4));
 
 	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
-	tft.print(paddedString(String(rmsHistory.back()), 4));
+	tft.print(paddedString(String(minSampleValue), 4));
 
 	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);

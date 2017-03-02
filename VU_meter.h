@@ -6,7 +6,7 @@
 
 uint16_t peakLevelLatched = 0;
 
-CRingBuffer<uint16_t, 8> rmsHistory;
+static CRingBuffer<uint16_t, 8> rmsHistory;
 
 inline void processNewSample(uint16_t newSample)
 {

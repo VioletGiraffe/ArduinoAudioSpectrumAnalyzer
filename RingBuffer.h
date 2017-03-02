@@ -1,11 +1,11 @@
 #pragma once
 
-template <typename T, uint16_t BufferSize>
+template <typename T, size_t BufferSize>
 class CRingBuffer
 {
 public:
 	using value_type = T;
-	static constexpr uint16_t Size = BufferSize;
+	static constexpr size_t Size = BufferSize;
 
 	CRingBuffer()
 	{
@@ -27,7 +27,7 @@ public:
 
 
 	// The items are stored from the oldest to the newest, so [0] == front() == oldest; [BufferSize-1] == back() == newwst.
-	const T operator[] (const uint16_t index) const
+	const T operator[] (const size_t index) const
 	{
 		return _buffer[incrementIndex(_oldestValueIndex, index)];
 	}
@@ -44,14 +44,20 @@ public:
 		return _buffer[_newestValueIndex];
 	}
 
-	static uint16_t size()
+	static size_t size()
 	{
 		return BufferSize;
 	}
 
+	// The RingBuffer is never empty, it's just filled with zeroes
+	static bool empty()
+	{
+		return false;
+	}
+
 private:
 	// This is really just modulo BufferSize addition
-	static uint16_t incrementIndex(uint16_t index, const uint16_t increment)
+	static size_t incrementIndex(size_t index, const size_t increment)
 	{
 		index += increment;
 		if (index >= BufferSize)
@@ -62,5 +68,5 @@ private:
 
 private:
 	T _buffer[BufferSize];
-	uint16_t _newestValueIndex = BufferSize - 1, _oldestValueIndex = 0;
+	size_t _newestValueIndex = BufferSize - 1, _oldestValueIndex = 0;
 };
