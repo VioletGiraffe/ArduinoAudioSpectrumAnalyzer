@@ -169,7 +169,7 @@ inline void updateScreen()
 
 	tft.setTextColor(RGB_to_565(0, 255, 10), RGB_to_565(0, 0, 0));
 	tft.setCursor(90, 0);
-	tft.print(paddedString(String(RMS), 4));
+	tft.print(paddedString(String(rmsHistory.back()), 4));
 
 	tft.setTextColor(RGB_to_565(0, 200, 255), RGB_to_565(0, 0, 0));
 	tft.setCursor(0, 0);

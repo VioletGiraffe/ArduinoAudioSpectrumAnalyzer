@@ -1,9 +1,12 @@
 #pragma once
 
+#include "RingBuffer.h"
+
 #include <math.h>
 
 uint16_t peakLevelLatched = 0;
-uint16_t RMS = 0;
+
+CRingBuffer<uint16_t, 8> rmsHistory;
 
 inline void processNewSample(uint16_t newSample)
 {
@@ -18,7 +21,7 @@ inline void processNewSample(uint16_t newSample)
 	{
 		// Updating the latched values
 		peakLevelLatched = peakLevelTemp;
-		RMS = sqrt(RMSBuffer / NumberOfSamplesToAverage);
+		rmsHistory.pushValue((uint16_t)sqrt(RMSBuffer / NumberOfSamplesToAverage));
 
 		// Clearing the running values
 		RMSBuffer = 0;
