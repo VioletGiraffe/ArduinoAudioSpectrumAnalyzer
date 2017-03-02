@@ -201,7 +201,7 @@ inline void updateVuDisplay()
 
 	tft.fillRect(0, vuYpos, barWidth, vuHeight, RGB_to_565(0, 255, 30));
 	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
-	tft.drawFastVLine(peakLevel, vuYpos, vuHeight, RGB_to_565(255, 0, 0));
+	tft.drawFastVLine(peakHistory.back(), vuYpos, vuHeight, RGB_to_565(255, 0, 0));
 
 	tft.setTextSize(1);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
