@@ -200,7 +200,9 @@ inline void updateVuDisplay()
 	if (peakLevelXpos < barWidth)
 		peakLevelXpos = barWidth;
 
-	tft.fillRect(0, vuYpos, barWidth, vuHeight, RGB_to_565(0, 255, 30));
+	const uint16_t vuBarColor = rms < 512 ? RGB_to_565(rms / 2, 255, 30) : RGB_to_565(255, (rms - 512) / 2, 30);
+
+	tft.fillRect(0, vuYpos, barWidth, vuHeight, vuBarColor);
 	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
 
