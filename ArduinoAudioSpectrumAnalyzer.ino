@@ -102,22 +102,6 @@ ISR(ADC_vect) //when new ADC value ready
 	}
 }
 
-inline String paddedString(const String& s, const uint8_t width, const bool leftJustify = true /* otherwise right-justify */)
-{
-	String padded;
-
-	if (leftJustify)
-		padded = s;
-
-	for (int i = 0; i < (int)s.length() - width; ++i) // If len < s.length(), the loop will handle it correctly, i. e. do nothing
-		padded += ' ';
-
-	if (!leftJustify)
-		padded += s;
-
-	return padded;
-}
-
 void loop()
 {
 	if (samplingWindowFull)
@@ -197,7 +181,6 @@ inline void updateTextDisplay()
 inline void updateVuDisplay()
 {
 	//const auto rmsExtremums = findMinMax(rmsHistory);
-	const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f);
 
 	constexpr int vuTextWidth = 6 * 6;
 
@@ -209,7 +192,9 @@ inline void updateVuDisplay()
 
 	previousPeak = peak;
 
-	const auto barWidth = rmsHistory.back() * (ScreenWidth - vuTextWidth) / 1024;
+	const auto rms = rmsHistory.back();
+
+	const auto barWidth = rms * (ScreenWidth - vuTextWidth) / 1024;
 	auto peakLevelXpos = peak * (ScreenWidth - vuTextWidth) / 1024;
 	if (peakLevelXpos < barWidth)
 		peakLevelXpos = barWidth;
@@ -217,6 +202,9 @@ inline void updateVuDisplay()
 	tft.fillRect(0, vuYpos, barWidth, vuHeight, RGB_to_565(0, 255, 30));
 	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
+
+	//const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f) = 10.0f * log(rmsHistory.back() / 1024.0f) / log(10.0f) = 10.0f * (log(rmsHistory.back()) - log(1024.0f) / log(10.0f);
+	const int8_t db = 4.34294f * (log10f_fast(rms) - 3.0103f);
 
 	tft.setTextSize(1);
 	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
