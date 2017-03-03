@@ -31,6 +31,7 @@ void setup()
 	tft.initR(ST7735_INITR_144GREENTAB); // initialize a ST7735S chip, 1.44" TFT, black tab
 	tft.fillScreen(ST7735_BLACK);
 	tft.setTextWrap(false);
+	drawStaticUiElements();
 }
 
 void setupADC()
@@ -209,5 +210,13 @@ inline void updateVuDisplay()
 	tft.setTextSize(1);
 	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
-	tft.print(paddedString(String(db), 3, false) + " dB");
+	tft.print(paddedString(String(db), 3, false));
+}
+
+inline void drawStaticUiElements()
+{
+	tft.setTextSize(1);
+	tft.setCursor(tft.width() - 20, vuYpos);
+	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
+	tft.print("dB");
 }
