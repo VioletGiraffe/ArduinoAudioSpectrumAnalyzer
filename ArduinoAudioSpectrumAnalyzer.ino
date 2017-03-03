@@ -181,7 +181,8 @@ inline void updateVuDisplay()
 {
 	//const auto rmsExtremums = findMinMax(rmsHistory);
 
-	constexpr int vuTextWidth = (5 + 3) * 6;
+	constexpr int symbolSize = 6;
+	constexpr int vuTextWidth = (5 + 3) * symbolSize;
 
 	static auto previousPeak = peakHistory.back();
 
@@ -205,13 +206,16 @@ inline void updateVuDisplay()
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
 
 	//const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f) = 10.0f * log(rmsHistory.back() / 1024.0f) / log(10.0f) = 10.0f * (log(rmsHistory.back()) - log(1024.0f) / log(10.0f);
-	const int16_t db = 100.0f * (log10f_fast((float)rms) - 3.0103f);
+	const int16_t dB = 100.0f * (log10f_fast((float)rms) - 3.0103f);
+	const int8_t integralDbPart = dB / 10;
+	const uint8_t fractionalDbPart = abs(dB - integralDbPart * 10);
 
 	tft.setTextSize(1);
-	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
-	//tft.print(paddedString(String(db), 5, false));
-  tft.print(db);
+	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
+	tft.print(paddedString(String(integralDbPart), 3, false));
+	tft.print('.');
+	tft.print(fractionalDbPart);
 }
 
 inline void drawStaticUiElements()
