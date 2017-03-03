@@ -25,7 +25,7 @@ inline void processNewSample(uint16_t newSample)
 	{
 		// Updating the latched values
 		peakHistory.pushValue(peakLevelTemp);
-		rmsHistory.pushValue((uint16_t)sqrt(RMSBuffer / NumberOfSamplesToAverage));
+		rmsHistory.pushValue(fast_sqrt32(RMSBuffer / NumberOfSamplesToAverage));
 
 		// Clearing the running values
 		RMSBuffer = 0;

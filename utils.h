@@ -47,3 +47,21 @@ inline float log2f_approx(float X)
 }
 
 #define log10f_fast(x) (log2f_approx(x) * 0.3010299956639812f)
+
+inline uint16_t fast_sqrt32(const uint32_t n)
+{
+	uint32_t c = 0x8000;
+	uint32_t g = 0x8000;
+
+	for (;;)
+	{
+		if (g*g > n)
+			g ^= c;
+
+		c >>= 1;
+		if (c == 0)
+			return g;
+
+		g |= c;
+	}
+}
