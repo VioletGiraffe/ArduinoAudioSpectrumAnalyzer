@@ -5,7 +5,6 @@
 #include <gfxfont.h>
 #include <PDQ_GFX.h>
 
-#include <assert.h>
 #include <math.h>
 
 #include "utils.h"
@@ -138,7 +137,6 @@ constexpr int ScreenWidth = 128, ScreenHeight = 128;
 
 inline void updateSpectrumDisplay()
 {
-	assert(FHT_N == 256);
 	//for (int i = 1; i < 128; ++i) // What's the deal with bin 0?
 	//{
 	//	const auto freeSpaceHeight = tft.height() - fht_log_out[i] / 2;
@@ -183,7 +181,7 @@ inline void updateVuDisplay()
 {
 	//const auto rmsExtremums = findMinMax(rmsHistory);
 
-	constexpr int vuTextWidth = 6 * 6;
+	constexpr int vuTextWidth = (5 + 3) * 6;
 
 	static auto previousPeak = peakHistory.back();
 
@@ -207,18 +205,19 @@ inline void updateVuDisplay()
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
 
 	//const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f) = 10.0f * log(rmsHistory.back() / 1024.0f) / log(10.0f) = 10.0f * (log(rmsHistory.back()) - log(1024.0f) / log(10.0f);
-	const int8_t db = 4.34294f * (log10f_fast(rms) - 3.0103f);
+	const int16_t db = 100.0f * (log10f_fast((float)rms) - 3.0103f);
 
 	tft.setTextSize(1);
 	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
-	tft.print(paddedString(String(db), 3, false));
+	//tft.print(paddedString(String(db), 5, false));
+  tft.print(db);
 }
 
 inline void drawStaticUiElements()
 {
 	tft.setTextSize(1);
-	tft.setCursor(tft.width() - 20, vuYpos);
+	tft.setCursor(tft.width() - 12, vuYpos);
 	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
 	tft.print("dB");
 }
