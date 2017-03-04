@@ -129,8 +129,7 @@ void loop()
 
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
-constexpr uint16_t textYpos = 0;
-constexpr uint16_t vuYpos = textYpos + 25 + 5, vuHeight = 10;
+constexpr uint16_t vuYpos = 0, vuHeight = 10;
 constexpr uint16_t spectrumYpos = vuYpos + vuHeight;
 
 constexpr int ScreenWidth = 128, ScreenHeight = 128;
@@ -184,9 +183,9 @@ inline void updateVuDisplay()
 	constexpr int symbolSize = 6;
 	constexpr int vuTextWidth = (5 + 3) * symbolSize;
 
-	static auto previousPeak = peakHistory.back();
+	static auto previousPeak = peakLevel;
 
-	auto peak = peakHistory.back();
+	auto peak = peakLevel;
 	if (peak < previousPeak && peak >= 48)
 		peak = previousPeak - 48;
 
@@ -204,24 +203,8 @@ inline void updateVuDisplay()
 	tft.fillRect(0, vuYpos, barWidth, vuHeight, vuBarColor);
 	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
-
-	//const int8_t db = 20.0f * log10(rmsHistory.back() / 1024.0f) = 10.0f * log(rmsHistory.back() / 1024.0f) / log(10.0f) = 10.0f * (log(rmsHistory.back()) - log(1024.0f) / log(10.0f);
-	const int16_t dB = 200.0f * (log10f_fast((float)rms) - 3.0103f);
-	const int8_t integralDbPart = dB / 10;
-	const uint8_t fractionalDbPart = integralDbPart * 10 - dB;
-
-	tft.setTextSize(1);
-	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
-	tft.setCursor(ScreenWidth - vuTextWidth, vuYpos);
-	tft.print(paddedString(String(integralDbPart), 3, false));
-	tft.print('.');
-	tft.print(fractionalDbPart);
 }
 
 inline void drawStaticUiElements()
 {
-	tft.setTextSize(1);
-	tft.setCursor(tft.width() - 12, vuYpos);
-	tft.setTextColor(RGB_to_565(0, 255, 0), RGB_to_565(0, 0, 0));
-	tft.print("dB");
 }

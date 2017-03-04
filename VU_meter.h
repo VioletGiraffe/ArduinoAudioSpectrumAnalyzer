@@ -10,7 +10,8 @@ struct VU_Data
 	uint16_t peak;
 };
 
-static CRingBuffer<uint16_t, 8> rmsHistory, peakHistory;
+static CRingBuffer<uint16_t, 8> rmsHistory;
+uint16_t peakLevel = 0;
 
 inline void processNewSample(uint16_t newSample)
 {
@@ -24,7 +25,7 @@ inline void processNewSample(uint16_t newSample)
 	if (numSamplesAccumulatedInBuffer == NumberOfSamplesToAverage)
 	{
 		// Updating the latched values
-		peakHistory.pushValue(peakLevelTemp);
+		peakLevel = peakLevelTemp;
 		rmsHistory.pushValue(fast_sqrt32(RMSBuffer / NumberOfSamplesToAverage));
 
 		// Clearing the running values
