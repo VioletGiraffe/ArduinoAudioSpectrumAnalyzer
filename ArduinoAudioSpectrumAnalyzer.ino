@@ -205,8 +205,8 @@ inline void updateVuDisplay()
 	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
 
-	//const int8_t db = 10.0f * log10(rmsHistory.back() / 1024.0f) = 10.0f * log(rmsHistory.back() / 1024.0f) / log(10.0f) = 10.0f * (log(rmsHistory.back()) - log(1024.0f) / log(10.0f);
-	const int16_t dB = 100.0f * (log10f_fast((float)rms) - 3.0103f);
+	//const int8_t db = 20.0f * log10(rmsHistory.back() / 1024.0f) = 10.0f * log(rmsHistory.back() / 1024.0f) / log(10.0f) = 10.0f * (log(rmsHistory.back()) - log(1024.0f) / log(10.0f);
+	const int16_t dB = 200.0f * (log10f_fast((float)rms) - 3.0103f);
 	const int8_t integralDbPart = dB / 10;
 	const uint8_t fractionalDbPart = integralDbPart * 10 - dB;
 
