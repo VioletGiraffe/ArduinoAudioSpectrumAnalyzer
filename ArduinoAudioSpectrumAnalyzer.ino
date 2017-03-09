@@ -129,7 +129,7 @@ void loop()
 
 #define RGB_to_565(R, G, B) static_cast<uint16_t>(((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3))
 
-constexpr uint16_t vuYpos = 0, vuHeight = 10;
+constexpr uint16_t vuYpos = 25, vuHeight = 10;
 constexpr uint16_t spectrumYpos = vuYpos + vuHeight;
 
 constexpr int ScreenWidth = 128, ScreenHeight = 128;
