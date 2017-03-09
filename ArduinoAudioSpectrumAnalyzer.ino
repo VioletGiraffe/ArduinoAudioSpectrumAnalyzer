@@ -178,11 +178,6 @@ inline void updateTextDisplay()
 
 inline void updateVuDisplay()
 {
-	//const auto rmsExtremums = findMinMax(rmsHistory);
-
-	constexpr int symbolSize = 6;
-	constexpr int vuTextWidth = (5 + 3) * symbolSize;
-
 	static auto previousPeak = peakLevel;
 
 	auto peak = peakLevel;
@@ -193,15 +188,15 @@ inline void updateVuDisplay()
 
 	const auto rms = rmsHistory.back();
 
-	const auto barWidth = rms * (ScreenWidth - vuTextWidth) / 1024;
-	auto peakLevelXpos = peak * (ScreenWidth - vuTextWidth) / 1024;
+	const auto barWidth = ((uint32_t)rms * (uint32_t)ScreenWidth) / 1024;
+	auto peakLevelXpos = ((uint32_t)peak * (uint32_t)ScreenWidth) / 1024;
 	if (peakLevelXpos < barWidth)
 		peakLevelXpos = barWidth;
 
 	const uint16_t vuBarColor = rms < 512 ? RGB_to_565(rms / 2, 255, 30) : RGB_to_565(255, (rms - 512) / 2, 30);
 
 	tft.fillRect(0, vuYpos, barWidth, vuHeight, vuBarColor);
-	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - vuTextWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
+	tft.fillRect(barWidth + 1, vuYpos, ScreenWidth - barWidth, vuHeight, RGB_to_565(0, 0, 0));
 	tft.drawFastVLine(peakLevelXpos, vuYpos, vuHeight, RGB_to_565(255, 0, 30));
 }
 
