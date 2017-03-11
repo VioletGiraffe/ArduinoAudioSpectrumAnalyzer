@@ -9,7 +9,6 @@
 
 #include "utils.h"
 #include "FHT_processing.h"
-#include "FastGraphics.h"
 #include "VU_meter.h"
 #include "Algorithms.h"
 
@@ -20,7 +19,7 @@
 #define TFT_RST 0  // you can also connect this to the Arduino reset, in which case, set this #define pin to 0!
 Adafruit_ST7735 tft = Adafruit_ST7735(ST7735_CS_PIN, ST7735_DC_PIN, TFT_RST);
 #else
-FastGraphics_ST7735 tft;
+PDQ_ST7735 tft;
 #endif
 
 void setup()
