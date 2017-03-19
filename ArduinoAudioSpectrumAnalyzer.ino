@@ -16,8 +16,10 @@
 #include "Test_signal.h"
 
 #ifndef _PDQ_ST7735H_
+#define TFT_CS 10
+#define TFT_DC 8
 #define TFT_RST 0  // you can also connect this to the Arduino reset, in which case, set this #define pin to 0!
-Adafruit_ST7735 tft = Adafruit_ST7735(ST7735_CS_PIN, ST7735_DC_PIN, TFT_RST);
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 #else
 PDQ_ST7735 tft;
 #endif
